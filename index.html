@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>卡皮巴拉學習樂園</title>
+    <style>
+        html, body { height: 100%; overscroll-behavior: none; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #ffd6e0, #c6f6d5, #bee3f8);
+            padding: 16px;
+        }
+        .game-container {
+            display: flex;
+            gap: 20px;
+            align-items: stretch;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-height: 96vh;
+            max-height: 96dvh;
+            width: 100%;
+            max-width: 1200px;
+            overflow-y: auto;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 22px 26px 26px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            text-align: center;
+            max-width: 620px;
+            width: 100%;
+            flex: 1 1 480px;
+            min-width: 320px;
+            position: relative;
+        }
+        /* 共用標題 */
+        .title-bar { display: flex; align-items: center; justify-content: center; gap: 10px; }
+        h1 { color: #ed64a6; font-size: 1.9rem; text-shadow: 2px 2px 0 #fbd38d; }
+
+        /* ===== 主選單 ===== */
+        .menu-panel { text-align: center; padding: 20px 0; }
+        .big-mascot { font-size: 6rem; margin: 10px 0 5px; }
+        .menu-title { font-size: 2.4rem; color: #ed64a6; margin: 10px 0 25px; text-shadow: 2px 2px 0 #fbd38d; }
+        .game-choice {
+            display: flex; flex-direction: column; gap: 18px; margin-top: 10px;
+        }
+        .choice-btn {
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            padding: 22px; border: none; border-radius: 25px; font-size: 1.5rem;
+            font-weight: bold; color: white; cursor: pointer; font-family: inherit;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.2); transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .choice-btn:hover { transform: translateY(-3px); }
+        .choice-btn:active { transform: translateY(2px); }
+        .choice-btn .emoji { font-size: 2.2rem; }
+        .choice-math { background: linear-gradient(145deg, #ed64a6, #d53f8c); box-shadow: 0 6px 0 #97266d; }
+        .choice-eng { background: linear-gradient(145deg, #4299e1, #3182ce); box-shadow: 0 6px 0 #2b6cb0; }
+        .choice-mul { background: linear-gradient(145deg, #ed8936, #dd6b20); box-shadow: 0 6px 0 #9c4221; }
+        .choice-sub { display: block; font-size: 0.9rem; font-weight: normal; opacity: 0.9; margin-top: 3px; }
+
+        /* ===== 設定面板 ===== */
+        .settings-panel {
+            background: #f7fafc; border: 2px solid #bee3f8; border-radius: 20px;
+            padding: 15px 20px; margin-bottom: 15px; text-align: left;
+        }
+        .settings-panel h3 { color: #2b6cb0; font-size: 1.1rem; margin-bottom: 12px; text-align: center; }
+        .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; }
+        .setting-label { font-weight: bold; color: #4a5568; font-size: 1rem; }
+        .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+        .opt-btn {
+            padding: 8px 14px; border: 2px solid #cbd5e0; background: white; border-radius: 30px;
+            font-size: 0.95rem; cursor: pointer; font-weight: bold; color: #4a5568; transition: all 0.15s; font-family: inherit;
+        }
+        .opt-btn.selected { background: #4299e1; border-color: #4299e1; color: white; }
+        .small-back {
+            font-size: 0.95rem; padding: 6px 14px; border: none; border-radius: 30px;
+            background: #e2e8f0; color: #4a5568; font-weight: bold; cursor: pointer; margin-bottom: 12px; font-family: inherit;
+        }
+        .start-btn {
+            width: 100%; font-size: 1.3rem; padding: 14px; border: none; border-radius: 50px;
+            background: linear-gradient(145deg, #48bb78, #38a169); color: white; font-weight: bold;
+            cursor: pointer; box-shadow: 0 5px 0 #276749; transition: transform 0.1s; font-family: inherit;
+        }
+        .start-btn:hover { transform: translateY(-2px); }
+        .start-btn:active { transform: translateY(2px); }
+
+        /* ===== 遊戲畫面 ===== */
+        .score-box { display: flex; justify-content: center; gap: 20px; margin-bottom: 10px; flex-wrap: wrap; }
+        .score-item { background: #fffaf0; border-radius: 15px; padding: 6px 16px; font-size: 1rem; color: #744210; border: 2px solid #fbd38d; }
+        .score-item span { font-size: 1.3rem; font-weight: bold; color: #dd6b20; }
+        .progress { color: #718096; font-size: 1.05rem; margin-bottom: 5px; }
+        .progress span { font-weight: bold; color: #4299e1; }
+        .category-tag {
+            display: inline-block; background: #ebf8ff; color: #2b6cb0; border-radius: 30px;
+            padding: 4px 14px; font-size: 0.9rem; font-weight: bold; margin-bottom: 8px;
+        }
+        .mascot-area { min-height: 90px; display: flex; align-items: center; justify-content: center; margin: 5px 0; }
+        .mascot-svg { display: block; transition: transform 0.3s; }
+        .mascot-svg.happy { animation: happyJump 0.6s ease; }
+        .mascot-svg.sad { animation: sadWobble 0.5s ease; }
+        @keyframes happyJump { 0% { transform: scale(1); } 40% { transform: scale(1.4) translateY(-15px); } 100% { transform: scale(1); } }
+        @keyframes sadWobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } 75% { transform: rotate(-8deg); } }
+
+        .question {
+            font-size: 2.6rem; font-weight: bold; color: #2d3748; margin: 8px 0 18px; letter-spacing: 3px;
+            min-height: 60px; display: flex; align-items: center; justify-content: center;
+        }
+        .question.math-q { font-size: 3rem; }
+        .operator-plus { color: #38a169; }
+        .operator-minus { color: #e53e3e; }
+        .category-note { font-size: 1rem; color: #718096; margin-bottom: 5px; }
+        .feedback { font-size: 1.4rem; font-weight: bold; min-height: 36px; margin-bottom: 10px; }
+        .feedback.correct { color: #38a169; }
+        .feedback.wrong { color: #e53e3e; }
+        .answers { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .answer-btn {
+            font-size: 1.6rem; padding: 18px 10px; border: none; border-radius: 20px;
+            background: linear-gradient(145deg, #667eea, #764ba2); color: white; font-weight: bold;
+            cursor: pointer; transition: transform 0.1s, box-shadow 0.1s; box-shadow: 0 5px 0 #4a3f7a;
+            font-family: inherit; letter-spacing: 1px;
+        }
+        .answer-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #4a3f7a; }
+        .answer-btn:active { transform: translateY(2px); box-shadow: 0 3px 0 #4a3f7a; }
+        .next-btn {
+            font-size: 1.2rem; padding: 12px 35px; border: none; border-radius: 50px;
+            background: linear-gradient(145deg, #f6ad55, #ed8936); color: white; font-weight: bold;
+            cursor: pointer; box-shadow: 0 5px 0 #c05621; transition: transform 0.1s; font-family: inherit;
+        }
+        .next-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 0 #c05621; }
+        .next-btn:active { transform: translateY(2px); }
+
+        /* ===== 拼字填空 ===== */
+        .spell-hint { font-size: 1rem; color: #718096; margin-bottom: 12px; }
+        .spell-slots {
+            display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
+            margin: 15px 0 20px; min-height: 70px;
+        }
+        .slot {
+            width: 48px; height: 58px; border: 3px dashed #cbd5e0; border-radius: 12px;
+            background: #f7fafc; font-size: 2rem; font-weight: bold; color: #2d3748;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.15s; user-select: none;
+        }
+        .slot.filled { border-style: solid; border-color: #4299e1; background: #ebf8ff; cursor: pointer; }
+        .slot.filled:hover { background: #fdff; }
+        .spell-letters {
+            display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+        }
+        .letter-btn {
+            width: 48px; height: 52px; border: none; border-radius: 12px; font-size: 1.6rem; font-weight: bold;
+            background: linear-gradient(145deg, #4299e1, #3182ce); color: white; cursor: pointer;
+            box-shadow: 0 4px 0 #2b6cb0; transition: transform 0.1s; font-family: inherit;
+        }
+        .letter-btn:hover { transform: translateY(-2px); }
+        .letter-btn:active { transform: translateY(2px); }
+        .letter-btn.used { opacity: 0.25; pointer-events: none; box-shadow: none; }
+        .spell-actions { display: flex; justify-content: center; gap: 12px; }
+        .spell-action-btn {
+            font-size: 1.05rem; padding: 10px 22px; border: none; border-radius: 50px;
+            background: #e2e8f0; color: #4a5568; font-weight: bold; cursor: pointer; font-family: inherit;
+        }
+        .spell-action-btn.check-btn { background: linear-gradient(145deg, #48bb78, #38a169); color: white; box-shadow: 0 4px 0 #276749; }
+        .spell-action-btn.check-btn:disabled { opacity: 0.4; box-shadow: none; }
+
+        /* ===== 結果畫面 ===== */
+        .result-title { font-size: 2rem; color: #805ad5; margin-bottom: 15px; }
+        .stars { font-size: 3.2rem; margin-bottom: 15px; letter-spacing: 5px; }
+        .result-message { font-size: 1.3rem; color: #4a5568; margin-bottom: 12px; }
+        .result-stats { background: #faf5ff; border-radius: 20px; padding: 15px; margin-bottom: 20px; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 1.2rem; padding: 6px 15px; color: #553c9a; }
+        .stat-row b { color: #322659; }
+        .again-btn {
+            font-size: 1.3rem; padding: 14px 40px; border: none; border-radius: 50px;
+            background: linear-gradient(145deg, #48bb78, #38a169); color: white; font-weight: bold;
+            cursor: pointer; box-shadow: 0 5px 0 #276749; transition: transform 0.1s; font-family: inherit;
+        }
+        .again-btn:hover { transform: translateY(-2px); }
+        .again-btn:active { transform: translateY(2px); }
+        .home-btn {
+            font-size: 1rem; padding: 10px 25px; border: none; border-radius: 50px;
+            background: #e2e8f0; color: #4a5568; font-weight: bold; cursor: pointer; margin-left: 8px; font-family: inherit;
+        }
+
+        /* ===== 畫板 ===== */
+        .draw-box {
+            background: white; border-radius: 30px; padding: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            text-align: center; flex: 1 1 460px; flex-shrink: 0; min-width: 320px;
+            max-width: 560px;
+        }
+        .draw-box h2 { color: #6b46c1; font-size: 1.5rem; margin-bottom: 15px; }
+        .canvas-wrap {
+            display: flex; justify-content: center; touch-action: none;
+            -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+            width: 100%;
+        }
+        #drawCanvas {
+            touch-action: none; background: #fffaf5; border: 3px dashed #d6bcfa;
+            border-radius: 15px; cursor: crosshair;
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 520px;
+        }
+        .draw-tools { display: flex; justify-content: center; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        .tool-btn {
+            font-size: 1.05rem; padding: 8px 18px; border: none; border-radius: 50px; cursor: pointer;
+            font-weight: bold; color: white; box-shadow: 0 3px 0 #4a3f7a; transition: transform 0.1s; font-family: inherit;
+        }
+        .tool-btn:hover { transform: translateY(-2px); }
+        .tool-btn:active { transform: translateY(1px); }
+        .clear-btn { background: #e53e3e; box-shadow: 0 3px 0 #9b2c2c; }
+        .erase-btn { background: #a0aec0; box-shadow: 0 3px 0 #718096; }
+        .redo-btn { background: #38a169; box-shadow: 0 3px 0 #276749; }
+        .pen-btn { background: #3182ce; box-shadow: 0 3px 0 #2b6cb0; }
+
+        .hidden { display: none !important; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .pop { animation: pop 0.4s ease; }
+        @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-8px); } 75% { transform: translateX(8px); } }
+        .shake { animation: shake 0.3s ease; }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+
+    <!-- 主要容器（主選單 / 設定 / 遊戲 / 結果都會顯示在這裡） -->
+    <div class="container" id="appArea">
+
+        <!-- ============ 主選單 ============ -->
+        <div id="menuPanel">
+            <div class="big-mascot">🦫</div>
+            <div class="menu-title">卡皮巴拉<br>學習樂園</div>
+            <div class="game-choice">
+                <button class="choice-btn choice-math" id="menuMath">
+                    <span class="emoji">➕</span>
+                    <span>加法減法
+                        <span class="choice-sub">動動腦算數學</span>
+                    </span>
+                </button>
+                <button class="choice-btn choice-eng" id="menuEng">
+                    <span class="emoji">🔤</span>
+                    <span>英文猜單字
+                        <span class="choice-sub">看中文猜英文</span>
+                    </span>
+                </button>
+                <button class="choice-btn choice-mul" id="menuMul">
+                    <span class="emoji">✖️</span>
+                    <span>九九乘法
+                        <span class="choice-sub">背九九乘法表</span>
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ============ 設定面板 ============ -->
+        <div id="settingsPanel" class="hidden">
+            <button class="small-back" id="backToMenu">🏠 回主選單</button>
+            <div class="title-bar"><h1 id="settingsTitle">加法減法</h1></div>
+            <div id="mathSettings" class="settings-panel" style="margin-top:15px">
+                <h3>🎯 選擇難度</h3>
+                <div class="setting-row">
+                    <span class="setting-label">數字大小</span>
+                    <div class="btn-group" id="levelGroup">
+                        <button class="opt-btn" data-level="1">個位數</button>
+                        <button class="opt-btn selected" data-level="2">十位數</button>
+                        <button class="opt-btn" data-level="3">三位數</button>
+                    </div>
+                </div>
+            </div>
+            <div id="engSettings" class="settings-panel" style="margin-top:15px">
+                <h3>🎮 選擇玩法</h3>
+                <div class="setting-row">
+                    <span class="setting-label">玩法</span>
+                    <div class="btn-group" id="modeGroup">
+                        <button class="opt-btn selected" data-emode="choice">✅ 選擇題</button>
+                        <button class="opt-btn" data-emode="spell">✏️ 拼字填空</button>
+                    </div>
+                </div>
+                <h3 style="margin-top:15px;border-top:1px solid #e2e8f0;padding-top:12px">📚 選擇單字類別</h3>
+                <div class="setting-row">
+                    <span class="setting-label">類別</span>
+                    <div class="btn-group" id="catGroup">
+                        <button class="opt-btn selected" data-cat="fruit">🍎 水果</button>
+                        <button class="opt-btn" data-cat="animal">🐶 動物</button>
+                        <button class="opt-btn" data-cat="color">🎨 顏色</button>
+                        <button class="opt-btn" data-cat="number">🔢 數字</button>
+                        <button class="opt-btn" data-cat="all">🎲 全部</button>
+                    </div>
+                </div>
+            </div>
+            <div id="mulSettings" class="settings-panel" style="margin-top:15px">
+                <h3>✖️ 九九乘法 1~9</h3>
+                <div class="setting-row" style="justify-content:center">
+                    <span class="setting-label">背九九乘法表，全部 1~9 混合出題</span>
+                </div>
+                <div class="setting-row">
+                    <span class="setting-label">🎖️ 連勝獎勵</span>
+                    <div class="btn-group" id="streakGroup">
+                        <button class="opt-btn selected" data-streak="on">開</button>
+                        <button class="opt-btn" data-streak="off">關</button>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-panel">
+                <h3>📝 題目數量</h3>
+                <div class="setting-row">
+                    <span class="setting-label">題數</span>
+                    <div class="btn-group" id="countGroup">
+                        <button class="opt-btn selected" data-count="5">5題</button>
+                        <button class="opt-btn" data-count="10">10題</button>
+                        <button class="opt-btn" data-count="20">20題</button>
+                    </div>
+                </div>
+            </div>
+            <button class="start-btn" id="startBtn">🚀 開始挑戰！</button>
+        </div>
+
+        <!-- ============ 遊戲進行畫面 ============ -->
+        <div id="playArea" class="hidden">
+            <button class="small-back" id="quitPanel">🏠 結束遊戲</button>
+            <div class="title-bar"><h1 id="playTitle">加法減法</h1></div>
+            <div class="score-box">
+                <div class="score-item">✅ <span id="correctCount">0</span></div>
+                <div class="score-item">❌ <span id="wrongCount">0</span></div>
+            </div>
+            <div class="progress">第 <span id="currentQ">1</span> / <span id="totalQ">10</span> 題</div>
+
+            <div class="mascot-area">
+                <svg id="mascot-idle" class="mascot-svg" viewBox="0 0 200 180" width="130" height="117">
+                    <ellipse cx="100" cy="120" rx="60" ry="48" fill="#B08968"/>
+                    <ellipse cx="100" cy="95" rx="44" ry="38" fill="#C9A47B"/>
+                    <ellipse cx="46" cy="60" rx="16" ry="24" fill="#C9A47B" transform="rotate(-20 46 60)"/>
+                    <ellipse cx="154" cy="60" rx="16" ry="24" fill="#C9A47B" transform="rotate(20 154 60)"/>
+                    <circle cx="64" cy="128" rx="12" ry="9" fill="#8B6B4F"/>
+                    <circle cx="136" cy="128" rx="12" ry="9" fill="#8B6B4F"/>
+                    <circle cx="80" cy="98" r="4.5" fill="#2B2118"/>
+                    <circle cx="120" cy="98" r="4.5" fill="#2B2118"/>
+                    <circle cx="81.5" cy="96.5" r="1.6" fill="#fff"/>
+                    <circle cx="121.5" cy="96.5" r="1.6" fill="#fff"/>
+                    <ellipse cx="100" cy="112" rx="10" ry="6" fill="#5A4433"/>
+                </svg>
+                <svg id="mascot-happy" class="mascot-svg" style="display:none" viewBox="0 0 200 180" width="130" height="117">
+                    <ellipse cx="100" cy="118" rx="60" ry="48" fill="#B08968"/>
+                    <ellipse cx="100" cy="93" rx="44" ry="38" fill="#C9A47B"/>
+                    <ellipse cx="46" cy="58" rx="16" ry="24" fill="#C9A47B" transform="rotate(-20 46 58)"/>
+                    <ellipse cx="154" cy="58" rx="16" ry="24" fill="#C9A47B" transform="rotate(20 154 58)"/>
+                    <circle cx="64" cy="126" rx="12" ry="9" fill="#8B6B4F"/>
+                    <circle cx="136" cy="126" rx="12" ry="9" fill="#8B6B4F"/>
+                    <path d="M78 100 Q81 95 85 100" stroke="#2B2118" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M115 100 Q119 95 122 100" stroke="#2B2118" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <path d="M96 108 Q100 116 104 108" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <path d="M52 96 Q40 88 44 80" stroke="#2B2118" stroke-width="4" fill="#C9A47B" stroke-linecap="round"/>
+                    <path d="M148 96 Q160 88 156 80" stroke="#2B2118" stroke-width="4" fill="#C9A47B" stroke-linecap="round"/>
+                </svg>
+                <svg id="mascot-sad" class="mascot-svg" style="display:none" viewBox="0 0 200 180" width="130" height="117">
+                    <ellipse cx="100" cy="120" rx="60" ry="48" fill="#A98C6B"/>
+                    <ellipse cx="100" cy="95" rx="44" ry="38" fill="#C9A47B"/>
+                    <ellipse cx="46" cy="60" rx="16" ry="24" fill="#C9A47B" transform="rotate(-20 46 60)"/>
+                    <ellipse cx="154" cy="60" rx="16" ry="24" fill="#C9A47B" transform="rotate(20 154 60)"/>
+                    <circle cx="64" cy="128" rx="12" ry="9" fill="#8B6B4F"/>
+                    <circle cx="136" cy="128" rx="12" ry="9" fill="#8B6B4F"/>
+                    <circle cx="80" cy="99" r="4.5" fill="#2B2118"/>
+                    <circle cx="120" cy="99" r="4.5" fill="#2B2118"/>
+                    <path d="M90 114 Q100 108 110 114" stroke="#2B2118" stroke-width="4" fill="none" stroke-linecap="round"/>
+                    <path d="M86 88 Q82 78 72 80" stroke="#2B2118" stroke-width="4" fill="#C9A47B" stroke-linecap="round"/>
+                    <path d="M114 88 Q118 78 128 80" stroke="#2B2118" stroke-width="4" fill="#C9A47B" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="feedback" id="feedback">&nbsp;</div>
+
+            <div class="category-tag hidden" id="categoryTag"></div>
+            <div class="question hidden" id="engWord"></div>
+            <div class="question math-q hidden" id="mathQ"></div>
+
+            <div class="answers" id="answers">
+                <button class="answer-btn"></button>
+                <button class="answer-btn"></button>
+                <button class="answer-btn"></button>
+                <button class="answer-btn"></button>
+            </div>
+
+            <!-- 拼字填空區 -->
+            <div id="spellArea" class="hidden">
+                <div class="spell-hint">👆 點下面的字母來拼出單字，點格子可以刪掉</div>
+                <div class="spell-slots" id="spellSlots"></div>
+                <div class="spell-letters" id="spellLetters"></div>
+                <div class="spell-actions">
+                    <button class="spell-action-btn" id="spellClear">🧹 清除</button>
+                    <button class="spell-action-btn check-btn" id="spellCheck" disabled>✅ 檢查答案</button>
+                </div>
+            </div>
+
+            <button class="next-btn hidden" id="nextBtn">➡️ 下一題</button>
+        </div>
+
+        <!-- ============ 結果畫面 ============ -->
+        <div id="resultArea" class="hidden">
+            <div class="result-title" id="resultTitle">挑戰完成！</div>
+            <div class="stars" id="stars">⭐️⭐️⭐️</div>
+            <div class="result-message" id="resultMessage">很棒！繼續加油！</div>
+            <div class="result-stats">
+                <div class="stat-row"><span>答對</span> <b id="rCorrect">0</b></div>
+                <div class="stat-row"><span>答錯</span> <b id="rWrong">0</b></div>
+                <div class="stat-row"><span>正確率</span> <b id="rRate">0%</b></div>
+                <div class="stat-row"><span>星星評價</span> <b id="rStars">0</b></div>
+            </div>
+            <button class="again-btn" id="againBtn">🔄 再玩一次</button>
+            <button class="home-btn" id="toMenu">🏠 回主選單</button>
+        </div>
+    </div>
+
+    <!-- ============ 計算畫板（加減遊戲用） ============ -->
+    <div class="draw-box" id="drawBox">
+        <h2>✏️ 計算畫板</h2>
+        <div class="canvas-wrap">
+            <canvas id="drawCanvas" width="480" height="480"></canvas>
+        </div>
+        <div class="draw-tools">
+            <button class="tool-btn pen-btn" id="penBtn">🖊️ 畫筆</button>
+            <button class="tool-btn erase-btn" id="eraseBtn">🧹 擦掉</button>
+            <button class="tool-btn redo-btn" id="redoBtn">↩️ 還原</button>
+            <button class="tool-btn clear-btn" id="clearBtn">🗑️ 清除</button>
+        </div>
+    </div>
+
+    </div>
+
+    <script>
+        /* =====================================================
+           單字庫
+        ===================================================== */
+        const WORDS = {
+            fruit: [
+                { zh: '蘋果', en: 'apple' }, { zh: '香蕉', en: 'banana' }, { zh: '橘子', en: 'orange' },
+                { zh: '葡萄', en: 'grape' }, { zh: '草莓', en: 'strawberry' }, { zh: '西瓜', en: 'watermelon' },
+                { zh: '鳳梨', en: 'pineapple' }, { zh: '芒果', en: 'mango' }, { zh: '檸檬', en: 'lemon' }, { zh: '桃子', en: 'peach' }
+            ],
+            animal: [
+                { zh: '貓', en: 'cat' }, { zh: '狗', en: 'dog' }, { zh: '鳥', en: 'bird' }, { zh: '魚', en: 'fish' },
+                { zh: '兔子', en: 'rabbit' }, { zh: '老虎', en: 'tiger' }, { zh: '大象', en: 'elephant' },
+                { zh: '猴子', en: 'monkey' }, { zh: '獅子', en: 'lion' }, { zh: '熊', en: 'bear' }
+            ],
+            color: [
+                { zh: '紅色', en: 'red' }, { zh: '藍色', en: 'blue' }, { zh: '綠色', en: 'green' }, { zh: '黃色', en: 'yellow' },
+                { zh: '黑色', en: 'black' }, { zh: '白色', en: 'white' }, { zh: '橘色', en: 'orange' }, { zh: '紫色', en: 'purple' },
+                { zh: '粉紅色', en: 'pink' }, { zh: '棕色', en: 'brown' }
+            ],
+            number: [
+                { zh: '一', en: 'one' }, { zh: '二', en: 'two' }, { zh: '三', en: 'three' }, { zh: '四', en: 'four' },
+                { zh: '五', en: 'five' }, { zh: '六', en: 'six' }, { zh: '七', en: 'seven' }, { zh: '八', en: 'eight' },
+                { zh: '九', en: 'nine' }, { zh: '十', en: 'ten' }
+            ]
+        };
+        const CAT_NAMES = { fruit: '🍎 水果', animal: '🐶 動物', color: '🎨 顏色', number: '🔢 數字', all: '🎲 全部混合' };
+
+        /* =====================================================
+           共用狀態
+        ===================================================== */
+        let mode = null;                    // 'math' / 'eng' / 'mul'
+        let settings = { level: 2, count: 10, cat: 'fruit', emode: 'choice', streak: true };
+        let correctCount = 0;
+        let wrongCount = 0;
+        let currentQ = 0;
+        let currentAnswer = null;
+        let answered = false;
+        let streakCount = 0;
+        let mascotIdle = null, mascotHappy = null, mascotSad = null;
+
+        const MAX_RANGE = { 1: 9, 2: 99, 3: 999 };
+        const MIN_RANGE = { 1: 1, 2: 10, 3: 100 };
+        const MODE_TITLE = { math: '加法減法', eng: '英文猜單字', mul: '九九乘法' };
+
+        function showMascot(state) {
+            if (!mascotIdle) {
+                mascotIdle = document.getElementById('mascot-idle');
+                mascotHappy = document.getElementById('mascot-happy');
+                mascotSad = document.getElementById('mascot-sad');
+            }
+            [mascotIdle, mascotHappy, mascotSad].forEach(s => {
+                if (s) { s.style.display = 'none'; s.classList.remove('happy', 'sad'); }
+            });
+            let target;
+            if (state === 'happy') target = mascotHappy;
+            else if (state === 'sad') target = mascotSad;
+            else target = mascotIdle;
+            if (target) {
+                target.style.display = 'block';
+                if (state === 'happy') target.classList.add('happy');
+                else if (state === 'sad') target.classList.add('sad');
+            }
+        }
+
+        /* =====================================================
+           音效
+        ===================================================== */
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+                catch(e) { audioCtx = null; }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+        }
+        function playTone(freq, duration, type, when) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type || 'sine';
+            osc.frequency.value = freq;
+            const t0 = audioCtx.currentTime + (when || 0);
+            gain.gain.setValueAtTime(0.0001, t0);
+            gain.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(t0);
+            osc.stop(t0 + duration + 0.02);
+        }
+        function soundCorrect() { playTone(523.25, 0.15, 'triangle'); playTone(659.25, 0.15, 'triangle', 0.12); playTone(783.99, 0.2, 'triangle', 0.24); }
+        function soundWrong() { playTone(200, 0.2, 'sawtooth'); playTone(150, 0.25, 'sawtooth', 0.15); }
+        function soundFinish() { playTone(523.25, 0.15, 'triangle'); playTone(659.25, 0.15, 'triangle', 0.12); playTone(783.99, 0.15, 'triangle', 0.24); playTone(1046.5, 0.3, 'triangle', 0.36); }
+
+        /* =====================================================
+           工具
+        ===================================================== */
+        function getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+        function shuffle(arr) {
+            const a = arr.slice();
+            for (let i = a.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [a[i], a[j]] = [a[j], a[i]];
+            }
+            return a;
+        }
+
+        /* =====================================================
+           畫面切換
+        ===================================================== */
+        function showPanel(id) {
+            ['menuPanel', 'settingsPanel', 'playArea', 'resultArea'].forEach(p => {
+                document.getElementById(p).classList.add('hidden');
+            });
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function needsBorrow(a, b) { return (a % 10) < (b % 10); }
+
+        /* =====================================================
+           題目產生（依模式）
+        ===================================================== */
+        function generateQuestion() {
+            if (mode === 'math') generateMath();
+            else if (mode === 'mul') generateMul();
+            else generateEng();
+        }
+
+        /* ============ 九九乘法 ============ */
+        function generateMul() {
+            const a = getRandomInt(1, 9);
+            const b = getRandomInt(1, 9);
+            const answer = a * b;
+            currentAnswer = answer;
+            // 顯示算式
+            document.getElementById('mathQ').innerHTML =
+                a + ' <span class="operator-plus">×</span> ' + b + ' = ';
+            document.getElementById('mathQ').classList.remove('hidden');
+            document.getElementById('engWord').classList.add('hidden');
+            document.getElementById('categoryTag').classList.add('hidden');
+            document.getElementById('answers').classList.remove('hidden');
+            document.getElementById('spellArea').classList.add('hidden');
+
+            // 產生 4 個數字選項
+            const set = new Set([answer]);
+            while (set.size < 4) {
+                let w = answer + getRandomInt(-6, 6);
+                if (w !== answer && w >= 0) set.add(w);
+            }
+            const choices = shuffle(Array.from(set));
+            fillButtons(choices);
+        }
+
+        function generateMath() {
+            const min = MIN_RANGE[settings.level];
+            const max = MAX_RANGE[settings.level];
+            let a, b, op, answer, displayOp;
+            if (Math.random() < 0.3) {
+                // 30% 加法
+                a = getRandomInt(min, max);
+                b = getRandomInt(min, max);
+                answer = a + b; op = '+'; displayOp = '+';
+            } else {
+                // 70% 減法，其中 50% 需借位
+                const wantBorrow = settings.level === 1 ? false : (Math.random() < 0.5);
+                let guard = 0;
+                do {
+                    a = getRandomInt(Math.max(min + 1, 2), max);
+                    b = getRandomInt(min, a - 1);
+                    guard++;
+                } while ((wantBorrow ? !needsBorrow(a, b) : needsBorrow(a, b)) && guard < 300);
+                answer = a - b; op = '-'; displayOp = '−';
+            }
+            currentAnswer = answer;
+            // 產生 4 個數字選項
+            const set = new Set([answer]);
+            while (set.size < 4) {
+                let w = answer + getRandomInt(-10, 10);
+                if (w !== answer && w >= 0) set.add(w);
+            }
+            const choices = shuffle(Array.from(set));
+            fillButtons(choices);
+            document.getElementById('mathQ').innerHTML =
+                a + ' <span class="operator-' + (op === '+' ? 'plus' : 'minus') + '">' + displayOp + '</span> ' + b + ' = ';
+            document.getElementById('mathQ').classList.remove('hidden');
+            document.getElementById('engWord').classList.add('hidden');
+            document.getElementById('categoryTag').classList.add('hidden');
+            document.getElementById('answers').classList.remove('hidden');
+            document.getElementById('spellArea').classList.add('hidden');
+        }
+
+        function getPool(cat) {
+            if (cat === 'all') return Object.keys(WORDS).reduce((acc, k) => acc.concat(WORDS[k]), []);
+            return WORDS[cat] || [];
+        }
+
+        function generateEng() {
+            if (settings.emode === 'spell') { generateSpell(); return; }
+            const pool = getPool(settings.cat);
+            const target = pool[getRandomInt(0, pool.length - 1)];
+            currentAnswer = target.en;
+            document.getElementById('engWord').textContent = target.zh;
+            document.getElementById('engWord').classList.remove('hidden');
+            document.getElementById('categoryTag').textContent = CAT_NAMES[settings.cat];
+            document.getElementById('categoryTag').classList.remove('hidden');
+            document.getElementById('mathQ').classList.add('hidden');
+
+            // 顯示選擇題，隱藏拼字
+            document.getElementById('answers').classList.remove('hidden');
+            document.getElementById('spellArea').classList.add('hidden');
+
+            const wrongs = shuffle(pool.filter(w => w.en !== target.en).map(w => w.en)).slice(0, 3);
+            let extra = 3 - wrongs.length;
+            if (extra > 0) {
+                const allPool = getPool('all').map(w => w.en).filter(w => w !== target.en && !wrongs.includes(w));
+                wrongs.push(...shuffle(allPool).slice(0, extra));
+            }
+            const choices = shuffle([target.en, ...wrongs].slice(0, 4));
+            fillButtons(choices);
+        }
+
+        /* ============ 拼字填空 ============ */
+        function generateSpell() {
+            const pool = getPool(settings.cat);
+            const target = pool[getRandomInt(0, pool.length - 1)];
+            currentAnswer = target.en;
+            document.getElementById('engWord').textContent = target.zh;
+            document.getElementById('engWord').classList.remove('hidden');
+            document.getElementById('categoryTag').textContent = CAT_NAMES[settings.cat];
+            document.getElementById('categoryTag').classList.remove('hidden');
+            document.getElementById('mathQ').classList.add('hidden');
+
+            // 顯示拼字，隱藏選擇題
+            document.getElementById('answers').classList.add('hidden');
+            document.getElementById('spellArea').classList.remove('hidden');
+
+            // 建立格子
+            const word = target.en;
+            const slotsEl = document.getElementById('spellSlots');
+            slotsEl.innerHTML = '';
+            for (let i = 0; i < word.length; i++) {
+                const div = document.createElement('div');
+                div.className = 'slot';
+                div.dataset.index = i;
+                slotsEl.appendChild(div);
+            }
+
+            // 建立打亂的字母（從單字本身的字母打亂）
+            const letters = word.split('');
+            document.getElementById('spellLetters').innerHTML = '';
+            // 若單字太短，多加幾個干擾字母讓遊戲更有變化
+            const extraLetters = ['a','e','i','o','u','s','t','n','r','l'];
+            while (letters.length < Math.min(6, word.length + 2)) {
+                letters.push(extraLetters[getRandomInt(0, extraLetters.length - 1)]);
+            }
+            shuffle(letters).forEach(ch => {
+                const b = document.createElement('button');
+                b.className = 'letter-btn';
+                b.textContent = ch;
+                b.addEventListener('click', function() { placeLetter(b); });
+                document.getElementById('spellLetters').appendChild(b);
+            });
+
+            document.getElementById('spellCheck').disabled = true;
+            spellCurrent = new Array(word.length);
+        }
+
+        // 記錄目前格子填入的值 (陣列，長度 = 格子數)
+        let spellCurrent = [];
+
+        function placeLetter(btn) {
+            if (answered) return;
+            const word = currentAnswer;
+            // 找第一個空格子填入
+            let slotIndex = -1;
+            for (let i = 0; i < word.length; i++) {
+                if (spellCurrent[i] === undefined) { slotIndex = i; break; }
+            }
+            if (slotIndex === -1) return; // 已滿
+            spellCurrent[slotIndex] = btn.textContent;
+            const slots = document.querySelectorAll('#spellSlots .slot');
+            slots[slotIndex].textContent = btn.textContent;
+            slots[slotIndex].classList.add('filled');
+            btn.classList.add('used');
+            checkSpellComplete();
+        }
+
+        function removeFromSlot(i) {
+            if (answered) return;
+            if (spellCurrent[i] === undefined) return;
+            // 把該字母歸還
+            const lettersEl = document.getElementById('spellLetters').children;
+            const letterBtns = Array.from(lettersEl);
+            const unused = letterBtns.find(b => !b.classList.contains('used'));
+            // 找一個 used 且字母相符的按鈕歸還（從最右邊的填字往回歸還）
+            // 簡化：歸還 index i 之後的所有，然後重排
+            spellCurrent[i] = undefined;
+            // 重新整理格子顯示
+            renderSpellFromCurrent();
+        }
+
+        function renderSpellFromCurrent() {
+            const word = currentAnswer;
+            const slots = document.querySelectorAll('#spellSlots .slot');
+            // 先清空所有 slot
+            document.querySelectorAll('#spellSlots .slot').forEach(s => {
+                s.textContent = '';
+                s.classList.remove('filled');
+            });
+            // 重新填入有值的
+            spellCurrent.forEach((ch, i) => {
+                if (ch !== undefined) {
+                    slots[i].textContent = ch;
+                    slots[i].classList.add('filled');
+                }
+            });
+            // 重新計算 used 按鈕（根據目前 spellCurrent 使用到的字母）
+            updateLetterUsage();
+            checkSpellComplete();
+        }
+
+        function updateLetterUsage() {
+            const used = spellCurrent.filter(c => c !== undefined);
+            const letterBtns = Array.from(document.getElementById('spellLetters').children);
+            // 全部先可用
+            letterBtns.forEach(b => b.classList.remove('used'));
+            // 標記被使用的
+            const usedCopy = used.slice();
+            letterBtns.forEach(b => {
+                const idx = usedCopy.indexOf(b.textContent);
+                if (idx !== -1) { b.classList.add('used'); usedCopy.splice(idx, 1); }
+            });
+        }
+
+        function checkSpellComplete() {
+            const word = currentAnswer;
+            const filled = spellCurrent.filter(c => c !== undefined).length;
+            document.getElementById('spellCheck').disabled = (filled !== word.length);
+        }
+
+        // 檢查拼字答案
+        function spellSubmit() {
+            if (answered) return;
+            const word = currentAnswer;
+            const typed = spellCurrent.join('');
+            const feedback = document.getElementById('feedback');
+
+            if (typed === word) {
+                correctCount++;
+                feedback.textContent = '🎉 好棒！拼對了！';
+                feedback.className = 'feedback correct';
+                showMascot('happy');
+                soundCorrect();
+            } else {
+                wrongCount++;
+                feedback.textContent = '😅 正確答案是 ' + word;
+                feedback.className = 'feedback wrong';
+                showMascot('sad');
+                soundWrong();
+                // 顯示正確拼法在格子上
+                const slots = document.querySelectorAll('#spellSlots .slot');
+                slots.forEach((s, i) => {
+                    s.textContent = word[i];
+                    s.classList.add('filled');
+                    s.style.borderColor = '#e53e3e';
+                });
+            }
+            answered = true;
+            document.querySelectorAll('#spellLetters .letter-btn').forEach(b => b.classList.add('used'));
+            document.getElementById('spellCheck').disabled = true;
+            updateScoreDisplay();
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function fillButtons(choices) {
+            const btns = document.querySelectorAll('#answers .answer-btn');
+            btns.forEach((btn, i) => {
+                btn.textContent = choices[i] || '';
+                btn.disabled = false;
+                btn.classList.remove('pop', 'shake');
+                btn.style.background = '';
+                btn.style.boxShadow = '';
+            });
+        }
+
+        /* =====================================================
+           遊戲流程
+        ===================================================== */
+        function startGame() {
+            correctCount = 0;
+            wrongCount = 0;
+            currentQ = 0;
+            streakCount = 0;
+            showMascot('idle');
+            document.getElementById('playTitle').textContent = MODE_TITLE[mode];
+            updateScoreDisplay();
+            showPanel('playArea');
+            loadQuestion();
+            // 加減遊戲顯示畫板，英文遊戲隱藏畫板
+            document.getElementById('drawBox').style.display = (mode === 'math') ? 'block' : 'none';
+        }
+
+        function loadQuestion() {
+            if (currentQ >= settings.count) { showResult(); return; }
+            answered = false;
+            document.getElementById('currentQ').textContent = currentQ + 1;
+            document.getElementById('totalQ').textContent = settings.count;
+            generateQuestion();
+            document.getElementById('feedback').textContent = '\u00a0';
+            document.getElementById('feedback').className = 'feedback';
+            document.getElementById('nextBtn').classList.add('hidden');
+        }
+
+        // 取出答案值（乘法/加減是數字，英文是字串）
+        function answerValue(btn) {
+            if (mode === 'math' || mode === 'mul') return parseInt(btn.textContent, 10);
+            return btn.textContent;
+        }
+
+        function checkAnswer(btn) {
+            if (answered) return;
+            answered = true;
+            const chosen = answerValue(btn);
+            const feedback = document.getElementById('feedback');
+            const btns = document.querySelectorAll('#answers .answer-btn');
+
+            if (chosen === currentAnswer) {
+                correctCount++;
+                streakCount++;
+                feedback.textContent = '🎉 好棒！答對了！';
+                feedback.className = 'feedback correct';
+                btn.classList.add('pop');
+                showMascot('happy');
+                soundCorrect();
+                if (mode === 'mul' && settings.streak) {
+                    maybeCelebrate();
+                }
+            } else {
+                wrongCount++;
+                streakCount = 0;
+                feedback.textContent = '😅 答案是 ' + currentAnswer;
+                feedback.className = 'feedback wrong';
+                btn.classList.add('shake');
+                showMascot('sad');
+                soundWrong();
+                btns.forEach(b => {
+                    if (answerValue(b) === currentAnswer) {
+                        b.style.background = 'linear-gradient(145deg, #48bb78, #38a169)';
+                        b.style.boxShadow = '0 5px 0 #276749';
+                        b.classList.add('correct-btn');
+                    }
+                });
+            }
+            btns.forEach(b => b.disabled = true);
+            updateScoreDisplay();
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        // 連勝獎勵動畫：連 3、5、7 題時慶祝
+        function maybeCelebrate() {
+            const targets = [3, 5, 7, 10];
+            if (targets.includes(streakCount)) {
+                const feedback = document.getElementById('feedback');
+                if (streakCount === 3) {
+                    feedback.textContent = '🔥 連續答對 3 題！好厲害！';
+                } else if (streakCount === 5) {
+                    feedback.textContent = '🌟 連續答對 5 題！你是乘法王！';
+                } else if (streakCount === 7) {
+                    feedback.textContent = '🏆 連續答對 7 題！太強了！';
+                } else {
+                    feedback.textContent = '👑 連續答對 10 題！超級乘法天才！';
+                }
+                soundWin();
+                // 呼喚卡皮巴拉慶祝
+                showMascot('happy');
+            }
+        }
+
+        function soundWin() {
+            playTone(523.25, 0.15, 'triangle');
+            playTone(659.25, 0.15, 'triangle', 0.12);
+            playTone(783.99, 0.15, 'triangle', 0.24);
+            playTone(1046.5, 0.2, 'triangle', 0.36);
+            playTone(1318.5, 0.35, 'triangle', 0.5);
+        }
+
+        function updateScoreDisplay() {
+            document.getElementById('correctCount').textContent = correctCount;
+            document.getElementById('wrongCount').textContent = wrongCount;
+        }
+
+        function nextQuestion() { currentQ++; loadQuestion(); }
+
+        function showResult() {
+            const rate = Math.round((correctCount / settings.count) * 100);
+            let stars = 0;
+            if (rate >= 80) stars = 3;
+            else if (rate >= 60) stars = 2;
+            else if (rate >= 40) stars = 1;
+
+            document.getElementById('rCorrect').textContent = correctCount;
+            document.getElementById('rWrong').textContent = wrongCount;
+            document.getElementById('rRate').textContent = rate + '%';
+            const starStr = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+            document.getElementById('rStars').textContent = starStr;
+            document.getElementById('stars').textContent = starStr;
+
+            let msg;
+            if (rate === 100) msg = '🏆 完美滿分！你太厲害了！';
+            else if (rate >= 80) msg = '🌟 超棒的表現！';
+            else if (rate >= 60) msg = '👍 很不錯，繼續加油！';
+            else if (rate >= 40) msg = '💪 再練習一下會更好！';
+            else msg = '🥺 沒關係，再試一次吧！';
+            document.getElementById('resultMessage').textContent = msg;
+            document.getElementById('resultTitle').textContent = MODE_TITLE[mode] + ' 完成！';
+
+            showPanel('resultArea');
+            soundFinish();
+        }
+
+        function enterMath() { mode = 'math'; enterSettings(); }
+        function enterEng() { mode = 'eng'; enterSettings(); }
+        function enterMul() { mode = 'mul'; enterSettings(); }
+        function enterSettings() {
+            document.getElementById('settingsTitle').textContent = MODE_TITLE[mode];
+            document.getElementById('mathSettings').style.display = (mode === 'math') ? 'block' : 'none';
+            document.getElementById('engSettings').style.display = (mode === 'eng') ? 'block' : 'none';
+            document.getElementById('mulSettings').style.display = (mode === 'mul') ? 'block' : 'none';
+            showPanel('settingsPanel');
+        }
+
+        /* =====================================================
+           設定綁定
+        ===================================================== */
+        document.getElementById('menuMath').addEventListener('click', enterMath);
+        document.getElementById('menuEng').addEventListener('click', enterEng);
+        document.getElementById('menuMul').addEventListener('click', enterMul);
+        document.getElementById('backToMenu').addEventListener('click', function() {
+            showPanel('menuPanel');
+            document.getElementById('drawBox').style.display = 'block';
+        });
+        document.getElementById('toMenu').addEventListener('click', function() {
+            showPanel('menuPanel');
+            document.getElementById('drawBox').style.display = 'block';
+        });
+        document.getElementById('quitPanel').addEventListener('click', function() {
+            showPanel('menuPanel');
+            document.getElementById('drawBox').style.display = 'block';
+        });
+
+        document.querySelectorAll('#levelGroup .opt-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('#levelGroup .opt-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.level = parseInt(this.dataset.level, 10);
+            });
+        });
+        document.querySelectorAll('#modeGroup .opt-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('#modeGroup .opt-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.emode = this.dataset.emode;
+            });
+        });
+        document.querySelectorAll('#catGroup .opt-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('#catGroup .opt-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.cat = this.dataset.cat;
+            });
+        });
+        document.querySelectorAll('#countGroup .opt-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('#countGroup .opt-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.count = parseInt(this.dataset.count, 10);
+            });
+        });
+        document.querySelectorAll('#streakGroup .opt-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('#streakGroup .opt-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                settings.streak = (this.dataset.streak === 'on');
+            });
+        });
+
+        document.getElementById('startBtn').addEventListener('click', function() {
+            initAudio();
+            const cntBtn = document.querySelector('#countGroup .opt-btn.selected');
+            settings.count = cntBtn ? parseInt(cntBtn.dataset.count, 10) : 10;
+            if (mode === 'math') {
+                const lvlBtn = document.querySelector('#levelGroup .opt-btn.selected');
+                settings.level = lvlBtn ? parseInt(lvlBtn.dataset.level, 10) : 2;
+            } else if (mode === 'mul') {
+                const streakBtn = document.querySelector('#streakGroup .opt-btn.selected');
+                settings.streak = streakBtn ? (streakBtn.dataset.streak === 'on') : true;
+            } else {
+                const catBtn = document.querySelector('#catGroup .opt-btn.selected');
+                settings.cat = catBtn ? catBtn.dataset.cat : 'fruit';
+                const modeBtn = document.querySelector('#modeGroup .opt-btn.selected');
+                settings.emode = modeBtn ? modeBtn.dataset.emode : 'choice';
+            }
+            startGame();
+        });
+
+        document.querySelectorAll('#answers .answer-btn').forEach(btn => {
+            btn.addEventListener('click', function() { checkAnswer(this); });
+        });
+        document.getElementById('nextBtn').addEventListener('click', function() { nextQuestion(); });
+        document.getElementById('againBtn').addEventListener('click', function() { initAudio(); startGame(); });
+
+        // 拼字填空：點格子刪除字母（事件委派）
+        document.getElementById('spellSlots').addEventListener('click', function(e) {
+            const slot = e.target.closest('.slot');
+            if (!slot || answered) return;
+            const i = parseInt(slot.dataset.index, 10);
+            if (spellCurrent[i] === undefined) return;
+            spellCurrent[i] = undefined;
+            renderSpellFromCurrent();
+        });
+        document.getElementById('spellCheck').addEventListener('click', function() { spellSubmit(); });
+        document.getElementById('spellClear').addEventListener('click', function() {
+            if (answered) return;
+            spellCurrent = spellCurrent.map(() => undefined);
+            renderSpellFromCurrent();
+        });
+
+        /* =====================================================
+           計算畫板
+        ===================================================== */
+        const canvas = document.getElementById('drawCanvas');
+        const ctx = canvas.getContext('2d');
+        let drawing = false, erasing = false, lastX = 0, lastY = 0;
+        const snapshots = [];
+
+        function initCanvas() { ctx.fillStyle = '#fffaf5'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+        initCanvas();
+
+        function saveSnapshot() { snapshots.push(canvas.toDataURL()); if (snapshots.length > 30) snapshots.shift(); }
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+            const cx = e.touches ? e.touches[0].clientX : e.clientX;
+            const cy = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: (cx - rect.left) * scaleX, y: (cy - rect.top) * scaleY };
+        }
+        function startDraw(e) { e.preventDefault(); drawing = true; saveSnapshot(); const p = getPos(e); lastX = p.x; lastY = p.y; }
+        function moveDraw(e) {
+            if (!drawing) return; e.preventDefault();
+            const p = getPos(e);
+            ctx.strokeStyle = erasing ? '#fffaf5' : '#2d3748';
+            ctx.lineWidth = erasing ? 30 : 5;
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+            ctx.beginPath(); ctx.moveTo(lastX, lastY); ctx.lineTo(p.x, p.y); ctx.stroke();
+            lastX = p.x; lastY = p.y;
+        }
+        function stopDraw() { drawing = false; }
+        function stopDrawTouch(e) { e.preventDefault(); drawing = false; }
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', moveDraw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', moveDraw, { passive: false });
+        canvas.addEventListener('touchend', stopDrawTouch, { passive: false });
+        canvas.addEventListener('touchcancel', stopDrawTouch, { passive: false });
+
+        const drawBox = document.getElementById('drawBox');
+        drawBox.addEventListener('touchmove', function(e) {
+            if (e.target === canvas || canvas.contains(e.target)) e.preventDefault();
+        }, { passive: false });
+
+        document.getElementById('penBtn').addEventListener('click', function() { erasing = false; });
+        document.getElementById('eraseBtn').addEventListener('click', function() { erasing = !erasing; });
+        document.getElementById('clearBtn').addEventListener('click', function() { saveSnapshot(); initCanvas(); });
+        document.getElementById('redoBtn').addEventListener('click', function() {
+            if (snapshots.length === 0) return;
+            const img = new Image();
+            img.onload = function() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.drawImage(img, 0, 0); };
+            img.src = snapshots.pop();
+        });
+
+        document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+        document.addEventListener('dblclick', function(e) { e.preventDefault(); });
+    </script>
+</body>
+</html>
